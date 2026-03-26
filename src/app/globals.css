@@ -54,7 +54,7 @@ body {
 }
 
 .score{
-  background:linear-gradient(135deg,#4caf50,);
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
   color:white; 
   padding:10px 22px;
   border-radius:12px;
