@@ -8,7 +8,7 @@ interface AuthFormWrapperProps {
 const AuthFromWrapper = ({ title, children }: AuthFormWrapperProps) => {
     return (
         // TAMBAHKAN DIV INI SEBAGAI PEMBUNGKUS LUAR
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
+        <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-2xl p-8 md:p-10">
             
             {/* Kotak Putih Form kamu */}
             <div className="w-full md:w-[700px] lg:w-[900px] bg-white rounded-2xl shadow-2xl p-10">
