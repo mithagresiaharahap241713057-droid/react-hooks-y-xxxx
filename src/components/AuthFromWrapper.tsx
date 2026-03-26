@@ -1,25 +1,16 @@
 import React, { ReactNode } from 'react';
-
 interface AuthFormWrapperProps {
     title: string;
     children: ReactNode;
 }
-
-const AuthFromWrapper = ({ title, children }: AuthFormWrapperProps) => {
+const AuthFromWrapper = ({ title, children }: AuthFormWrapperProps)=> {
     return (
-        // TAMBAHKAN DIV INI SEBAGAI PEMBUNGKUS LUAR
-        <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-            
-            {/* Kotak Putih Form kamu */}
-            <div className="w-full md:w-[700px] lg:w-[900px] bg-white rounded-2xl shadow-2xl p-10">
-                <h2 className="text-3xl font-bold text-center mb-8 text-primary">
-                    {title}
-                </h2>
-                {children}
-            </div>
-
+    <div className="w-full max-w-md bg-white rounded-xl shadowlg p-8">
+            <h2 className="text-3xl font-cold text-center mb-8 textprimary">
+                {title}
+            </h2>
+            {children}
         </div>
     );
 };
-
-export default AuthFromWrapper;
+export default AuthFromWrapper; 
