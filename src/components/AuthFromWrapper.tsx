@@ -1,16 +1,19 @@
 import React, { ReactNode } from 'react';
+
 interface AuthFormWrapperProps {
     title: string;
     children: ReactNode;
 }
-const AuthFromWrapper = ({ title, children }: AuthFormWrapperProps)=> {
+
+const AuthFromWrapper = ({ title, children }: AuthFormWrapperProps) => {
     return (
-    <div className="w-full max-w-md bg-white rounded-xl shadowlg p-8">
-            <h2 className="text-3xl font-cold text-center mb-8 textprimary">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
                 {title}
             </h2>
             {children}
         </div>
     );
 };
-export default AuthFromWrapper; 
+
+export default AuthFromWrapper;
