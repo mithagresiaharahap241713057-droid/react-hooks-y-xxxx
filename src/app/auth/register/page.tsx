@@ -21,7 +21,6 @@ export default function RegisterPage() {
   const emailRef = useRef<HTMLInputElement>(null);
   const staticCaptcha = "MDhrNL";
 
-  // 🔥 Strength + harus cocok
   useEffect(() => {
     let calculatedStrength =
       (formData.password.length > 7 ? 25 : 0) +
@@ -46,15 +45,12 @@ export default function RegisterPage() {
       setFormData({ ...formData, [name]: value });
     }
 
-    // 🔥 REAL-TIME EMAIL VALIDATION
+    // realtime email validation
     if (name === "email") {
       const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|net|co)$/;
 
       if (value && !emailPattern.test(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          email: "Format email tidak valid"
-        }));
+        setErrors((prev) => ({ ...prev, email: "Format email tidak valid" }));
       } else {
         setErrors((prev) => {
           const newErrors = { ...prev };
@@ -63,9 +59,7 @@ export default function RegisterPage() {
         });
       }
 
-      if (emailRef.current) {
-        emailRef.current.setCustomValidity("");
-      }
+      emailRef.current?.setCustomValidity("");
     }
 
     if (errors[name] && name !== "email") {
@@ -79,42 +73,27 @@ export default function RegisterPage() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|net|co)$/;
 
-    // Username
     if (!formData.username) newErrors.username = "Username wajib diisi";
-    else if (formData.username.length < 3) newErrors.username = "Username minimal 3 karakter";
     else if (formData.username.length > 8) newErrors.username = "Username maksimal 8 karakter";
 
-    // Email (popup + error text)
-    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|net|co)$/;
     if (!formData.email) {
       newErrors.email = "Email wajib diisi";
       emailRef.current?.setCustomValidity("Email wajib diisi");
     } else if (!emailPattern.test(formData.email)) {
       newErrors.email = "Format email tidak valid";
-      emailRef.current?.setCustomValidity(
-        `Sertakan '@' pada alamat email. '${formData.email}' tidak memiliki '@'.`
-      );
-    } else {
-      emailRef.current?.setCustomValidity("");
+      emailRef.current?.setCustomValidity("Format email tidak valid");
     }
 
-    // Phone
-    if (!formData.phone) newErrors.phone = "Nomor telepon wajib diisi";
-    else if (formData.phone.length < 10) newErrors.phone = "Nomor telepon minimal 10 karakter";
-
-    // Password
     if (!formData.password) newErrors.password = "Password wajib diisi";
-    else if (formData.password.length < 8) newErrors.password = "Password minimal 8 karakter";
 
-    // Confirm Password
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Konfirmasi password wajib diisi";
     } else if (formData.confirmPassword !== formData.password) {
       newErrors.confirmPassword = "Konfirmasi password tidak cocok";
     }
 
-    // Captcha
     if (!formData.captchaInput) {
       newErrors.captchaInput = "Captcha wajib diisi";
     } else if (formData.captchaInput !== staticCaptcha) {
@@ -126,16 +105,14 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const validationErrors = validateForm();
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
 
-      // 🔥 TRIGGER POPUP EMAIL
-      if (emailRef.current && validationErrors.email) {
-        emailRef.current.reportValidity();
-        emailRef.current.focus();
+      if (validationErrors.email) {
+        emailRef.current?.reportValidity();
+        emailRef.current?.focus();
       }
     } else {
       alert("Register Berhasil!");
@@ -145,19 +122,20 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-xl shadow-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Username */}
           <div>
-            <label className="text-xs font-semibold">
+            <label className="text-xs font-semibold text-gray-600">
               Username <span className="text-gray-400">(max 8 karakter)</span>
             </label>
             <input
               name="username"
               placeholder="Masukkan username"
-              className="w-full border p-2 text-sm placeholder-gray-400"
+              className="w-full border rounded-md p-2 text-sm focus:outline-none focus:border-blue-500"
               value={formData.username}
               onChange={handleChange}
             />
@@ -166,15 +144,14 @@ export default function RegisterPage() {
 
           {/* Email */}
           <div>
-            <label className="text-xs font-semibold">Email</label>
+            <label className="text-xs font-semibold text-gray-600">Email</label>
             <input
               ref={emailRef}
               name="email"
               type="email"
               required
-              pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|net|co)"
               placeholder="Masukkan email"
-              className="w-full border p-2 text-sm placeholder-gray-400"
+              className="w-full border rounded-md p-2 text-sm focus:outline-none focus:border-blue-500"
               value={formData.email}
               onChange={handleChange}
             />
@@ -183,63 +160,60 @@ export default function RegisterPage() {
 
           {/* Password */}
           <div>
-            <label className="text-xs font-semibold">Password</label>
-            <input
-              name="password"
-              type="password"
-              placeholder="Masukkan password"
-              className="w-full border p-2 text-sm placeholder-gray-400"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
-
-            {formData.password && (
-              <div className="mt-2">
-                <div className="bg-gray-200 h-1.5">
-                  <div
-                    className={`h-full ${
-                      strength < 50 ? "bg-red-500" : strength < 100 ? "bg-yellow-500" : "bg-green-500"
-                    }`}
-                    style={{ width: `${strength}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-right">Strength: {strength}%</p>
-              </div>
-            )}
+            <label className="text-xs font-semibold text-gray-600">Password</label>
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Masukkan password"
+                className="w-full border rounded-md p-2 pr-10 text-sm focus:outline-none focus:border-blue-500"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5">
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="text-xs font-semibold">Konfirmasi Password</label>
-            <input
-              name="confirmPassword"
-              type="password"
-              placeholder="Masukkan ulang password"
-              className="w-full border p-2 text-sm placeholder-gray-400"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
-            {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
+            <label className="text-xs font-semibold text-gray-600">Konfirmasi Password</label>
+            <div className="relative">
+              <input
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Masukkan ulang password"
+                className="w-full border rounded-md p-2 pr-10 text-sm focus:outline-none focus:border-blue-500"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-2.5">
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           {/* Captcha */}
           <div>
-            <div className="flex gap-2">
-              <div className="bg-gray-200 px-3 py-1">{staticCaptcha}</div>
-              <FaSyncAlt />
+            <div className="flex items-center gap-2 mb-1">
+              <div className="bg-gray-100 px-3 py-1 rounded font-bold">{staticCaptcha}</div>
+              <FaSyncAlt className="cursor-pointer text-blue-500" />
             </div>
             <input
               name="captchaInput"
               placeholder="Masukkan captcha"
-              className="w-full border p-2 text-sm placeholder-gray-400"
+              className="w-full border rounded-md p-2 text-sm focus:outline-none focus:border-blue-500"
               value={formData.captchaInput}
               onChange={handleChange}
             />
             {errors.captchaInput && <p className="text-red-500 text-xs">{errors.captchaInput}</p>}
           </div>
 
-          <button className="w-full bg-blue-600 text-white p-2">Register</button>
+          <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+            Register
+          </button>
+
         </form>
       </div>
     </div>
