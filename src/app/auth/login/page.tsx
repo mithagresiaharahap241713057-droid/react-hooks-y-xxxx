@@ -31,6 +31,7 @@ const LoginPage = () => {
 
     const [errors, setErrors] = useState<ErrorObject>({});
     const [attempts, setAttempts] = useState(3);
+    const [showPassword, setShowPassword] = useState(false);
 
     const generateCaptcha = () => {
         return Math.random().toString(36).substring(2, 8);
@@ -49,28 +50,24 @@ const LoginPage = () => {
 
         const newErrors: ErrorObject = {};
 
-        // VALIDASI EMAIL
         if (!formData.email.trim()) {
             newErrors.email = 'Email tidak boleh kosong';
-        } else if (formData.email !== "NPMKAMU@gmail.com") {
-            newErrors.email = 'Email harus sesuai NPM';
+        } else if (formData.email !== "3057@gmail.com") {
+            newErrors.email = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
         }
 
-        // VALIDASI PASSWORD
         if (!formData.password.trim()) {
             newErrors.password = 'Password tidak boleh kosong';
-        } else if (formData.password !== "NPMKAMU") {
-            newErrors.password = 'Password harus sesuai NPM';
+        } else if (formData.password !== "241713057") {
+            newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 220711905)';
         }
 
-        // VALIDASI CAPTCHA
         if (!formData.captchaInput.trim()) {
             newErrors.captcha = 'Captcha belum diisi';
         } else if (formData.captchaInput !== captcha) {
-            newErrors.captcha = 'Captcha salah';
+            newErrors.captcha = 'Captcha tidak valid';
         }
 
-        // JIKA ERROR
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
 
@@ -78,31 +75,29 @@ const LoginPage = () => {
                 setAttempts(prev => Math.max(prev - 1, 0));
             }
 
-            toast.error(`Login gagal! Sisa kesempatan: ${attempts - 1}`, {
-                position: 'top-right'
-            });
+            toast.error(`Login gagal! Sisa kesempatan: ${attempts - 1}`);
 
             if (attempts - 1 === 0) {
-                toast.error("Kesempatan login habis!", {
-                    position: 'top-right'
-                });
+                toast.error("Kesempatan login habis!");
             }
 
             return;
         }
 
-        // LOGIN BERHASIL
         localStorage.setItem("isLogin", "true");
 
-        toast.success('Login Berhasil!', {
-            position: 'top-right'
-        });
-
+        toast.success('Login Berhasil!');
         router.push('/home');
     };
 
     return (
         <AuthFromWrapper title="Login">
+
+            {/* 🔥 TAMBAHAN: SISA KESEMPATAN */}
+            <p className="text-center text-sm text-gray-500 mb-3">
+                Sisa Kesempatan: {attempts}
+            </p>
+
             <form onSubmit={handleSubmit} className="space-y-5 w-full">
 
                 {/* EMAIL */}
@@ -112,23 +107,35 @@ const LoginPage = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
                         placeholder="Masukan email"
                     />
                     {errors.email && <p className="text-red-600 text-sm italic">{errors.email}</p>}
                 </div>
 
-                {/* PASSWORD */}
+                {/* PASSWORD + ICON 👁️ */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-                        placeholder="Masukan password"
-                    />
+
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
+                            placeholder="Masukan password"
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-2.5 text-gray-500"
+                        >
+                            {showPassword ? "🙈" : "👁️"}
+                        </button>
+                    </div>
+
                     {errors.password && <p className="text-red-600 text-sm italic">{errors.password}</p>}
                 </div>
 
@@ -155,12 +162,14 @@ const LoginPage = () => {
                         <span className="bg-gray-200 px-3 py-1 rounded font-mono">
                             {captcha}
                         </span>
+
+                        {/* 🔥 GANTI JADI ICON */}
                         <button
                             type="button"
                             onClick={() => setCaptcha(generateCaptcha())}
-                            className="text-blue-500 text-sm"
+                            className="text-blue-500 text-lg"
                         >
-                            Refresh
+                            ⟳
                         </button>
                     </div>
 
@@ -168,7 +177,7 @@ const LoginPage = () => {
                         name="captchaInput"
                         value={formData.captchaInput}
                         onChange={handleChange}
-                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
                         placeholder="Masukan captcha"
                     />
                     {errors.captcha && <p className="text-red-600 text-sm italic">{errors.captcha}</p>}
