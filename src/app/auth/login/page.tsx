@@ -6,6 +6,7 @@ import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import SocialAuth from '../../../components/SocialAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface LoginFormData {
     email: string;
@@ -93,7 +94,7 @@ const LoginPage = () => {
     return (
         <AuthFromWrapper title="Login">
 
-            {/* 🔥 TAMBAHAN: SISA KESEMPATAN */}
+            {/* SISA KESEMPATAN */}
             <p className="text-center text-sm text-gray-500 mb-3">
                 Sisa Kesempatan: {attempts}
             </p>
@@ -107,13 +108,15 @@ const LoginPage = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
+                        className={`w-full px-4 py-2.5 rounded-lg border 
+                        ${errors.email ? 'border-red-500' : 'border-gray-300'} 
+                        focus:ring-2 focus:ring-blue-400`}
                         placeholder="Masukan email"
                     />
                     {errors.email && <p className="text-red-600 text-sm italic">{errors.email}</p>}
                 </div>
 
-                {/* PASSWORD + ICON 👁️ */}
+                {/* PASSWORD + ICON (FIX) */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Password</label>
 
@@ -123,16 +126,18 @@ const LoginPage = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
+                            className={`w-full px-4 py-2.5 rounded-lg border 
+                            ${errors.password ? 'border-red-500' : 'border-gray-300'} 
+                            focus:ring-2 focus:ring-blue-400`}
                             placeholder="Masukan password"
                         />
 
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-2.5 text-gray-500"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
                         >
-                            {showPassword ? "fa-solid fa-eye" : "togglePassword"}
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
 
@@ -163,7 +168,6 @@ const LoginPage = () => {
                             {captcha}
                         </span>
 
-                        {/* 🔥 GANTI JADI ICON */}
                         <button
                             type="button"
                             onClick={() => setCaptcha(generateCaptcha())}
@@ -177,7 +181,9 @@ const LoginPage = () => {
                         name="captchaInput"
                         value={formData.captchaInput}
                         onChange={handleChange}
-                        className={`w-full px-4 py-2.5 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-400`}
+                        className={`w-full px-4 py-2.5 rounded-lg border 
+                        ${errors.captcha ? 'border-red-500' : 'border-gray-300'} 
+                        focus:ring-2 focus:ring-blue-400`}
                         placeholder="Masukan captcha"
                     />
                     {errors.captcha && <p className="text-red-600 text-sm italic">{errors.captcha}</p>}
