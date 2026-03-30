@@ -132,7 +132,7 @@ const LoginPage = () => {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-2.5 text-gray-500"
                         >
-                            {showPassword ? "🙈" : "👁️"}
+                            {showPassword ? "fa-solid fa-eye" : "togglePassword"}
                         </button>
                     </div>
 
