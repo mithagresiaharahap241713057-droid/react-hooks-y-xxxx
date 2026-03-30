@@ -20,10 +20,9 @@ interface ErrorObject {
     captcha?: string;
 }
 
-const DEFAULT_CAPTCHA = 'AbCdef';
-
 const LoginPage = () => {
     const router = useRouter();
+
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: '',
@@ -31,6 +30,13 @@ const LoginPage = () => {
     });
 
     const [errors, setErrors] = useState<ErrorObject>({});
+    const [attempts, setAttempts] = useState(3);
+
+    const generateCaptcha = () => {
+        return Math.random().toString(36).substring(2, 8);
+    };
+
+    const [captcha, setCaptcha] = useState(generateCaptcha());
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -42,44 +48,80 @@ const LoginPage = () => {
         e.preventDefault();
 
         const newErrors: ErrorObject = {};
-        if (!formData.email.trim()) newErrors.email = 'Email tidak boleh kosong';
-        if (!formData.password.trim()) newErrors.password = 'Password tidak boleh kosong';
+
+        // VALIDASI EMAIL
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email tidak boleh kosong';
+        } else if (formData.email !== "NPMKAMU@gmail.com") {
+            newErrors.email = 'Email harus sesuai NPM';
+        }
+
+        // VALIDASI PASSWORD
+        if (!formData.password.trim()) {
+            newErrors.password = 'Password tidak boleh kosong';
+        } else if (formData.password !== "NPMKAMU") {
+            newErrors.password = 'Password harus sesuai NPM';
+        }
+
+        // VALIDASI CAPTCHA
         if (!formData.captchaInput.trim()) {
             newErrors.captcha = 'Captcha belum diisi';
-        } else if (formData.captchaInput !== DEFAULT_CAPTCHA) {
+        } else if (formData.captchaInput !== captcha) {
             newErrors.captcha = 'Captcha salah';
         }
 
+        // JIKA ERROR
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            toast.error('Login Gagal!', { theme: 'dark', position: 'top-right' });
+
+            if (attempts > 0) {
+                setAttempts(prev => Math.max(prev - 1, 0));
+            }
+
+            toast.error(`Login gagal! Sisa kesempatan: ${attempts - 1}`, {
+                position: 'top-right'
+            });
+
+            if (attempts - 1 === 0) {
+                toast.error("Kesempatan login habis!", {
+                    position: 'top-right'
+                });
+            }
+
             return;
         }
 
-        toast.success('Login Berhasil!', { theme: 'dark', position: 'top-right' });
+        // LOGIN BERHASIL
+        localStorage.setItem("isLogin", "true");
+
+        toast.success('Login Berhasil!', {
+            position: 'top-right'
+        });
+
         router.push('/home');
     };
 
     return (
         <AuthFromWrapper title="Login">
             <form onSubmit={handleSubmit} className="space-y-5 w-full">
+
+                {/* EMAIL */}
                 <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+                    <label className="text-sm font-medium text-gray-700">Email</label>
                     <input
-                        id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
                         className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="Masukan email"
                     />
-                    {errors.email && <p className="text-red-600 text-sm italic mt-1">{errors.email}</p>}
+                    {errors.email && <p className="text-red-600 text-sm italic">{errors.email}</p>}
                 </div>
 
+                {/* PASSWORD */}
                 <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700">Password</label>
+                    <label className="text-sm font-medium text-gray-700">Password</label>
                     <input
-                        id="password"
                         type="password"
                         name="password"
                         value={formData.password}
@@ -87,11 +129,12 @@ const LoginPage = () => {
                         className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="Masukan password"
                     />
-                    {errors.password && <p className="text-red-600 text-sm italic mt-1">{errors.password}</p>}
+                    {errors.password && <p className="text-red-600 text-sm italic">{errors.password}</p>}
                 </div>
 
-                <div className="flex items-center justify-between mt-2">
-                    <label className="flex items-center text-sm text-gray-700">
+                {/* REMEMBER */}
+                <div className="flex justify-between">
+                    <label className="text-sm">
                         <input
                             type="checkbox"
                             name="remberMe"
@@ -99,46 +142,68 @@ const LoginPage = () => {
                             onChange={(e) =>
                                 setFormData(prev => ({ ...prev, remberMe: e.target.checked }))
                             }
-                            className="mr-2 h-4 w-4 rounded border-gray-300"
-                        />
-                        Ingat Saya
+                        /> Ingat Saya
                     </label>
-                    <Link href="/auth/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                    <Link href="/auth/forgot-password" className="text-blue-600 text-sm">
                         Forgot Password?
                     </Link>
                 </div>
-                
 
+                {/* CAPTCHA */}
                 <div className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                        <span className="text-sm font-medium text-gray-700">Captcha:</span>
-                        <span className="font-mono text-lg font-bold text-gray-800 bg-gray-100 px-3 py-1.5 rounded">
-                            {DEFAULT_CAPTCHA}
+                    <div className="flex items-center gap-2">
+                        <span className="bg-gray-200 px-3 py-1 rounded font-mono">
+                            {captcha}
                         </span>
+                        <button
+                            type="button"
+                            onClick={() => setCaptcha(generateCaptcha())}
+                            className="text-blue-500 text-sm"
+                        >
+                            Refresh
+                        </button>
                     </div>
+
                     <input
-                        type="text"
                         name="captchaInput"
                         value={formData.captchaInput}
                         onChange={handleChange}
                         className={`w-full px-4 py-2.5 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="Masukan captcha"
                     />
-                    {errors.captcha && <p className="text-red-600 text-sm italic mt-1">{errors.captcha}</p>}
+                    {errors.captcha && <p className="text-red-600 text-sm italic">{errors.captcha}</p>}
                 </div>
 
+                {/* SIGN IN */}
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg"
+                    disabled={attempts === 0}
+                    className={`w-full py-2.5 rounded-lg text-white font-semibold 
+                    ${attempts === 0 ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
                     Sign In
                 </button>
 
+                {/* RESET */}
+                <button
+                    type="button"
+                    disabled={attempts !== 0}
+                    onClick={() => {
+                        setAttempts(3);
+                        setCaptcha(generateCaptcha());
+                        toast.info("Kesempatan direset!");
+                    }}
+                    className={`w-full py-2.5 rounded-lg mt-2 font-semibold
+                    ${attempts === 0 ? 'bg-green-600 text-white' : 'bg-gray-400 text-white'}`}
+                >
+                    Reset Kesempatan
+                </button>
+
                 <SocialAuth />
 
-                <p className="mt-6 text-center text-sm text-gray-600">
+                <p className="text-center text-sm">
                     Tidak punya akun?{' '}
-                    <Link href="/auth/register" className="text-blue-600 hover:text-blue-800 font-semibold">
+                    <Link href="/auth/register" className="text-blue-600">
                         Daftar
                     </Link>
                 </p>
