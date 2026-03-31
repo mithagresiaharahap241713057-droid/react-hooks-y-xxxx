@@ -250,13 +250,20 @@ const RegisterPage = () => {
                 </div>
 
                 {/* CAPTCHA */}
-                <div>
-                    <label>Captcha:</label>
-                    <div className="flex gap-2">
-                        <span className="bg-gray-200 px-3 py-1 rounded">{captcha}</span>
-                        <button type="button" onClick={() => setCaptcha(generateCaptcha())}>⟳</button>
-                    </div>
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="bg-gray-200 px-3 py-1 rounded font-mono">
+                            {captcha}
+                        </span>
 
+                        <button
+                            type="button"
+                            onClick={() => setCaptcha(generateCaptcha())}
+                            className="text-blue-500 text-lg"
+                        >
+                            ⟳
+                        </button>
+                    </div>
                     <input
                         name="captchaInput"
                         placeholder="Masukkan captcha"
