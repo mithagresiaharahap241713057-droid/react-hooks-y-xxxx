@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import SocialAuth from '../../../components/SocialAuth';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface FormData {
@@ -240,7 +241,7 @@ const RegisterPage = () => {
                 <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
                     Register
                 </button>
-
+                <SocialAuth />
                 <p className="text-center text-sm">
                     Sudah punya akun? <Link href="/auth/login" className="text-blue-600">Login</Link>
                 </p>
