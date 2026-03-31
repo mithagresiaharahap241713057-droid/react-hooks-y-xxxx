@@ -149,18 +149,24 @@ const RegisterPage = () => {
                 </div>
 
                 {/* EMAIL */}
-                <div>
+                <div className="relative">
                     <label>Email</label>
                     <input
-                        type="email"
-                        placeholder="Masukkan email"
-                        pattern=".+@(.*\.(com|net|co))"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
                     />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                    {/* 🔥 ERROR TEXT (yang lama tetap) */}
+                    {errors.email && (
+                        <p className="text-red-500 text-sm">{errors.email}</p>
+                        )}
+                    {/* 🔥 TOOLTIP CUSTOM */}
+                    {errors.email === "Format email tidak valid" && (
+                        <div className="absolute left-0 mt-1 bg-red-100 text-red-600 text-xs px-3 py-1 rounded shadow">
+                            Sertakan '@' pada alamat email dan domain (.com/.net/.co)
+                            </div>
+                        )}
                 </div>
 
                 {/* PHONE */}
