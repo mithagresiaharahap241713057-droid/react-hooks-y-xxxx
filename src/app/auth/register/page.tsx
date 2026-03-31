@@ -136,7 +136,7 @@ const RegisterPage = () => {
 
     return (
         <AuthFromWrapper title="Register">
-            <form onSubmit={handleSubmit} className="space-y-4 w-full">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4 w-full">
 
                 {/* USERNAME */}
                 <div>
