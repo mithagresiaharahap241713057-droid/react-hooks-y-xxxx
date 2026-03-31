@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import Link from 'next/link';
@@ -40,12 +40,27 @@ const RegisterPage = () => {
     const [errors, setErrors] = useState<Errors>({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [strength, setStrength] = useState(0);
 
     const generateCaptcha = () => {
         return Math.random().toString(36).substring(2, 8);
     };
 
     const [captcha, setCaptcha] = useState(generateCaptcha());
+
+    // 🔥 PASSWORD STRENGTH
+    useEffect(() => {
+        const password = formData.password;
+
+        const strengthValue = Math.min(
+            (password.length > 7 ? 25 : 0) +
+            (/[A-Z]/.test(password) ? 25 : 0) +
+            (/[0-9]/.test(password) ? 25 : 0) +
+            (/[^A-Za-z0-9]/.test(password) ? 25 : 0)
+        );
+
+        setStrength(strengthValue);
+    }, [formData.password]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -75,15 +90,13 @@ const RegisterPage = () => {
         // PHONE
         if (!formData.phone.trim()) {
             newErrors.phone = 'Nomor telepon wajib diisi';
-        } else if (!/^[0-9]+$/.test(formData.phone)) {
-            newErrors.phone = 'Harus angka';
         }
 
         // PASSWORD
         if (!formData.password) {
             newErrors.password = 'Password tidak boleh kosong';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Minimal 6 karakter';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'Minimal 8 karakter';
         }
 
         // CONFIRM PASSWORD
@@ -95,12 +108,12 @@ const RegisterPage = () => {
         if (!formData.captchaInput.trim()) {
             newErrors.captcha = 'Captcha belum diisi';
         } else if (formData.captchaInput !== captcha) {
-            newErrors.captcha = 'Captcha salah';
+            newErrors.captcha = 'Captcha tidak sesuai';
         }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            toast.error("Registrasi gagal, cek input!");
+            toast.error("Registrasi gagal!");
             return;
         }
 
@@ -110,12 +123,11 @@ const RegisterPage = () => {
 
     return (
         <AuthFromWrapper title="Register">
-
             <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
                 {/* USERNAME */}
-                <div className="space-y-1">
-                    <label className="text-sm">Username</label>
+                <div>
+                    <label>Username</label>
                     <input
                         name="username"
                         value={formData.username}
@@ -127,8 +139,8 @@ const RegisterPage = () => {
                 </div>
 
                 {/* EMAIL */}
-                <div className="space-y-1">
-                    <label className="text-sm">Email</label>
+                <div>
+                    <label>Email</label>
                     <input
                         name="email"
                         value={formData.email}
@@ -140,25 +152,26 @@ const RegisterPage = () => {
                 </div>
 
                 {/* PHONE */}
-                <div className="space-y-2">
+                <div>
                     <label>Nomor Telepon</label>
                     <input
-                    name="phone"
-                inputMode="numeric"
-                value={formData.phone}
-                onChange={(e) => {
-                    const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
-                    setFormData(prev => ({ ...prev, phone: onlyNumbers }));
-                    setErrors(prev => ({ ...prev, phone: undefined }));
-                }}
-                className="w-full px-4 py-2 border rounded-lg"
-                placeholder="Masukkan nomor telepon"
-                />
+                        name="phone"
+                        inputMode="numeric"
+                        value={formData.phone}
+                        onChange={(e) => {
+                            const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
+                            setFormData(prev => ({ ...prev, phone: onlyNumbers }));
+                            setErrors(prev => ({ ...prev, phone: undefined }));
+                        }}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Masukkan nomor telepon"
+                    />
+                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                 </div>
 
                 {/* PASSWORD */}
-                <div className="space-y-1">
-                    <label className="text-sm">Password</label>
+                <div>
+                    <label>Password</label>
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
@@ -166,22 +179,33 @@ const RegisterPage = () => {
                             value={formData.password}
                             onChange={handleChange}
                             className="w-full px-4 py-2 pr-10 border rounded-lg"
-                            placeholder="Masukkan password"
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-3 flex items-center text-gray-400"
+                            className="absolute right-3 top-2.5"
                         >
-                            {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
+
+                    {/* 🔥 STRENGTH BAR */}
+                    <div className="mt-1">
+                        <div className="w-full h-2 bg-gray-200 rounded">
+                            <div
+                                className="h-2 bg-blue-500 rounded"
+                                style={{ width: `${strength}%` }}
+                            />
+                        </div>
+                        <p className="text-sm">Strength: {strength}%</p>
+                    </div>
+
                     {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
                 </div>
 
                 {/* CONFIRM PASSWORD */}
-                <div className="space-y-1">
-                    <label className="text-sm">Konfirmasi Password</label>
+                <div>
+                    <label>Konfirmasi Password</label>
                     <div className="relative">
                         <input
                             type={showConfirm ? "text" : "password"}
@@ -189,28 +213,23 @@ const RegisterPage = () => {
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             className="w-full px-4 py-2 pr-10 border rounded-lg"
-                            placeholder="Ulangi password"
                         />
                         <button
                             type="button"
                             onClick={() => setShowConfirm(!showConfirm)}
-                            className="absolute inset-y-0 right-3 flex items-center text-gray-400"
+                            className="absolute right-3 top-2.5"
                         >
-                            {showConfirm ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                            {showConfirm ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
                     {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
                 </div>
 
                 {/* CAPTCHA */}
-                <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                        <span className="bg-gray-200 px-3 py-1 rounded font-mono">{captcha}</span>
-                        <button
-                            type="button"
-                            onClick={() => setCaptcha(generateCaptcha())}
-                            className="text-blue-500"
-                        >
+                <div>
+                    <div className="flex gap-2">
+                        <span className="bg-gray-200 px-3 py-1 rounded">{captcha}</span>
+                        <button type="button" onClick={() => setCaptcha(generateCaptcha())}>
                             ⟳
                         </button>
                     </div>
@@ -226,10 +245,7 @@ const RegisterPage = () => {
                 </div>
 
                 {/* BUTTON */}
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                >
+                <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
                     Register
                 </button>
 
