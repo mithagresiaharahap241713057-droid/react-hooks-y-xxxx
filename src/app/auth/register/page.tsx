@@ -181,13 +181,14 @@ const RegisterPage = () => {
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
-
+                    {formData.password && (
                     <div className="mt-1">
                         <div className="w-full h-2 bg-gray-200 rounded">
                             <div className="h-2 bg-blue-500 rounded" style={{ width: `${strength}%` }} />
                         </div>
                         <p className="text-sm">Strength: {strength}%</p>
                     </div>
+                    )}
 
                     {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
                 </div>
