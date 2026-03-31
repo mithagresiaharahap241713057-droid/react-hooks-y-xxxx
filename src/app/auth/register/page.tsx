@@ -68,10 +68,20 @@ const RegisterPage = () => {
     }, [formData.password, formData.confirmPassword]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => ({ ...prev, [name]: undefined }));
-    };
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: undefined }));
+
+    // ✅ REALTIME EMAIL VALIDATION (TAMBAHAN)
+    if (name === "email") {
+        if (value && !/\S+@\S+\.(com|net|co)/.test(value)) {
+            setErrors(prev => ({
+                ...prev,
+                email: "Format email tidak valid"
+            }));
+        }
+    }
+};
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -92,6 +102,8 @@ const RegisterPage = () => {
 
         if (!formData.phone.trim()) {
             newErrors.phone = 'Nomor telepon wajib diisi';
+        } else if (formData.phone.length < 10) {
+            newErrors.phone = 'Nomor telepon minimal 10 karakter';
         }
 
         if (!formData.password) {
@@ -142,6 +154,9 @@ const RegisterPage = () => {
                 <div>
                     <label>Email</label>
                     <input
+                        type="email"
+                        required
+                        pattern=".+@(.*\.(com|net|co))"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
