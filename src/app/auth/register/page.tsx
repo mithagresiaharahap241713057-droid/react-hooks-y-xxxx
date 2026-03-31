@@ -88,8 +88,10 @@ const RegisterPage = () => {
 
         if (!formData.username.trim()) {
             newErrors.username = 'Username wajib diisi';
-        } else if (formData.username.length < 3 || formData.username.length > 8) {
-            newErrors.username = 'Username harus 3-8 karakter';
+        } else if (formData.username.length < 3) {
+            newErrors.username = 'Username minimal 3 karakter';
+        } else if (formData.username.length > 8) {
+            newErrors.username = 'Username maksimal 8 karakter';
         }
 
         // 🔥 EMAIL VALIDATION + TOOLTIP HTML
