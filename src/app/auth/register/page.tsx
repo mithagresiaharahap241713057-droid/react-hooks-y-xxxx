@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import Link from 'next/link';
@@ -28,6 +28,7 @@ interface Errors {
 
 const RegisterPage = () => {
     const router = useRouter();
+    const emailRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState<FormData>({
         username: '',
@@ -43,7 +44,7 @@ const RegisterPage = () => {
     const [showConfirm, setShowConfirm] = useState(false);
 
     const [strength, setStrength] = useState(0);
-    const [confirmStrength, setConfirmStrength] = useState(0); // 🔥 NEW
+    const [confirmStrength, setConfirmStrength] = useState(0);
 
     const generateCaptcha = () => {
         return Math.random().toString(36).substring(2, 8);
@@ -51,9 +52,8 @@ const RegisterPage = () => {
 
     const [captcha, setCaptcha] = useState(generateCaptcha());
 
-    // 🔥 FUNCTION BIAR GA DOUBLE
     const calculateStrength = (password: string) => {
-        return Math.min(
+        return (
             (password.length > 7 ? 25 : 0) +
             (/[A-Z]/.test(password) ? 25 : 0) +
             (/[0-9]/.test(password) ? 25 : 0) +
@@ -61,7 +61,6 @@ const RegisterPage = () => {
         );
     };
 
-    // 🔥 USE EFFECT UNTUK KEDUA PASSWORD
     useEffect(() => {
         setStrength(calculateStrength(formData.password));
         setConfirmStrength(calculateStrength(formData.confirmPassword));
@@ -69,8 +68,41 @@ const RegisterPage = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => ({ ...prev, [name]: undefined }));
+
+        if (name === "phone") {
+            const onlyNumber = value.replace(/\D/g, "");
+            setFormData(prev => ({ ...prev, phone: onlyNumber }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
+        // 🔥 REAL-TIME EMAIL VALIDATION
+        if (name === "email") {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.(com|net|co)$/;
+
+            if (value && !emailPattern.test(value)) {
+                setErrors(prev => ({
+                    ...prev,
+                    email: "Format email tidak valid"
+                }));
+            } else {
+                setErrors(prev => {
+                    const newErr = { ...prev };
+                    delete newErr.email;
+                    return newErr;
+                });
+            }
+
+            emailRef.current?.setCustomValidity("");
+        }
+
+        if (errors[name as keyof Errors] && name !== "email") {
+            setErrors(prev => {
+                const newErr = { ...prev };
+                delete newErr[name as keyof Errors];
+                return newErr;
+            });
+        }
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -80,24 +112,30 @@ const RegisterPage = () => {
 
         if (!formData.username.trim()) {
             newErrors.username = 'Username wajib diisi';
-        } else if (formData.username.length < 3) {
-            newErrors.username = 'Minimal 3 karakter';
         }
 
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email wajib diisi';
-        } else if (!formData.email.includes('@')) {
-            newErrors.email = 'Format email tidak valid';
+        // EMAIL VALIDATION + HTML5 TOOLTIP
+        if (!formData.email) {
+            newErrors.email = "Email wajib diisi";
+            emailRef.current?.setCustomValidity("Email wajib diisi");
+        } else if (!/^[^\s@]+@[^\s@]+\.(com|net|co)$/.test(formData.email)) {
+            newErrors.email = "Format email tidak valid";
+            emailRef.current?.setCustomValidity(
+                `Sertakan '@' pada alamat email. "${formData.email}" tidak valid`
+            );
+        } else {
+            emailRef.current?.setCustomValidity("");
         }
 
-        if (!formData.phone.trim()) {
+        // 🔥 PHONE MIN 10 DIGIT
+        if (!formData.phone) {
             newErrors.phone = 'Nomor telepon wajib diisi';
+        } else if (formData.phone.length < 10) {
+            newErrors.phone = 'Nomor telepon minimal 10 karakter';
         }
 
         if (!formData.password) {
             newErrors.password = 'Password wajib diisi';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'Minimal 8 karakter';
         }
 
         if (!formData.confirmPassword) {
@@ -106,7 +144,7 @@ const RegisterPage = () => {
             newErrors.confirmPassword = 'Password tidak sama';
         }
 
-        if (!formData.captchaInput.trim()) {
+        if (!formData.captchaInput) {
             newErrors.captcha = 'Captcha belum diisi';
         } else if (formData.captchaInput !== captcha) {
             newErrors.captcha = 'Captcha tidak sesuai';
@@ -114,6 +152,13 @@ const RegisterPage = () => {
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+
+            // 🔥 TRIGGER HTML5 TOOLTIP
+            if (newErrors.email) {
+                emailRef.current?.reportValidity();
+                emailRef.current?.focus();
+            }
+
             toast.error("Registrasi gagal!");
             return;
         }
@@ -126,22 +171,11 @@ const RegisterPage = () => {
         <AuthFromWrapper title="Register">
             <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
-                {/* USERNAME */}
-                <div>
-                    <label>Username</label>
-                    <input
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
-                    />
-                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-                </div>
-
-                {/* EMAIL */}
                 <div>
                     <label>Email</label>
                     <input
+                        ref={emailRef}
+                        type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
@@ -150,98 +184,23 @@ const RegisterPage = () => {
                     {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
 
-                {/* PHONE */}
                 <div>
                     <label>Nomor Telepon</label>
                     <input
                         name="phone"
-                        inputMode="numeric"
                         value={formData.phone}
-                        onChange={(e) => {
-                            const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
-                            setFormData(prev => ({ ...prev, phone: onlyNumbers }));
-                            setErrors(prev => ({ ...prev, phone: undefined }));
-                        }}
+                        onChange={handleChange}
                         className="w-full px-4 py-2 border rounded-lg"
                     />
                     {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                 </div>
 
-                {/* PASSWORD */}
-                <div>
-                    <label>Password</label>
-                    <div className="relative">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg"
-                        />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5">
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                    </div>
-                    {formData.password && (
-                    <div className="mt-1">
-                        <div className="w-full h-2 bg-gray-200 rounded">
-                            <div className="h-2 bg-blue-500 rounded" style={{ width: `${strength}%` }} />
-                        </div>
-                        <p className="text-sm">Strength: {strength}%</p>
-                    </div>
-                    )}
-
-                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-                </div>
-
-                {/* CONFIRM PASSWORD */}
-                <div>
-                    <label>Konfirmasi Password</label>
-                    <div className="relative">
-                        <input
-                            type={showConfirm ? "text" : "password"}
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg"
-                        />
-                        <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-2.5">
-                            {showConfirm ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                    </div>
-
-                    {formData.password && (
-                    <div className="mt-1">
-                        <div className="w-full h-2 bg-gray-200 rounded">
-                            <div className="h-2 bg-blue-500 rounded" style={{ width: `${confirmStrength}%` }} />
-                        </div>
-                        <p className="text-sm">Strength: {confirmStrength}%</p>
-                    </div>
-                    )}
-
-                    {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-                </div>
-
-                {/* CAPTCHA */}
-                <div>
-                    <div className="flex gap-2">
-                        <span className="bg-gray-200 px-3 py-1 rounded">{captcha}</span>
-                        <button type="button" onClick={() => setCaptcha(generateCaptcha())}>⟳</button>
-                    </div>
-
-                    <input
-                        name="captchaInput"
-                        value={formData.captchaInput}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
-                    />
-                    {errors.captcha && <p className="text-red-500 text-sm">{errors.captcha}</p>}
-                </div>
-
                 <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
                     Register
                 </button>
+
                 <SocialAuth />
+
                 <p className="text-center text-sm">
                     Sudah punya akun? <Link href="/auth/login" className="text-blue-600">Login</Link>
                 </p>
