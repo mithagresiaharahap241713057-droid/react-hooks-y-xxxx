@@ -149,26 +149,26 @@ const RegisterPage = () => {
                 </div>
 
                 {/* EMAIL */}
-                <div className="relative group">
+                <div className="relative">
                     <label>Email</label>
                     <input
                     name="email"
                     placeholder="Masukkan email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className="peer w-full px-4 py-2 border rounded-lg"
                     />
                     {/* 🔥 ERROR TEXT (yang lama tetap) */}
                     {errors.email && (
                         <p className="text-red-500 text-sm">{errors.email}</p>
-                        )}
+                    )}
                     {/* 🔥 TOOLTIP HOVER */}
                     {errors.email === "Format email tidak valid" && (
                         <div className="absolute left-0 top-full mt-1 
-                        bg-red-100 text-red-600 text-xs 
-                        px-3 py-1 rounded shadow 
-                        opacity-0 group-hover:opacity-100 
-                        transition">
+                                        bg-red-100 text-red-600 text-xs 
+                                        px-3 py-1 rounded shadow 
+                                        opacity-0 group-hover:opacity-100 
+                                        transitio duration-200">
                             Sertakan '@' pada alamat email dan domain (.com/.net/.co)
                         </div>
                         )}
