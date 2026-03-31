@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import './globals.css';
 import { ToastContainer } from 'react-toastify';
+import 'bootstrap/dist/css/bootstrap.min.css';
 export const metadata: Metadata = {
   title: 'Auth System',
   description: 'Login and Register System',
