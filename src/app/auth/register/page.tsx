@@ -160,9 +160,15 @@ const RegisterPage = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        onInvalid={(e) => {
+                            e.currentTarget.setCustomValidity("Sertakan '@' pada alamat email dan domain (.com/.net/.co)");
+                        }}
+                        onInput={(e) => {
+                            e.currentTarget.setCustomValidity("");
+                        }}
                         className="w-full px-4 py-2 border rounded-lg"
-                    />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                        />
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
 
                 {/* PHONE */}
