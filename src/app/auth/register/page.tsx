@@ -1,243 +1,244 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Form, Button, ProgressBar, Container, Row, Col } from "react-bootstrap";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthFromWrapper from '../../../components/AuthFromWrapper';
+import Link from 'next/link';
+import { toast } from 'react-toastify';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-interface FormDataType {
-  username: string;
-  email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  captcha: string;
+interface FormData {
+    username: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+    captchaInput: string;
 }
 
-interface ErrorType {
-  username?: string;
-  email?: string;
-  phone?: string;
-  password?: string;
-  confirmPassword?: string;
-  captcha?: string;
+interface Errors {
+    username?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    confirmPassword?: string;
+    captcha?: string;
 }
 
 const RegisterPage = () => {
-  const [formData, setFormData] = useState<FormDataType>({
-    username: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    captcha: "",
-  });
+    const router = useRouter();
 
-  const [errors, setErrors] = useState<ErrorType>({});
-  const [captchaText, setCaptchaText] = useState<string>("");
-  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+    const [formData, setFormData] = useState<FormData>({
+        username: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+        captchaInput: ''
+    });
 
-  // 🔥 Generate captcha (AMAN dari hydration)
-  const generateCaptcha = () => {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "";
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setCaptchaText(result);
-  };
+    const [errors, setErrors] = useState<Errors>({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    generateCaptcha();
-  }, []);
+    const generateCaptcha = () => {
+        return Math.random().toString(36).substring(2, 8);
+    };
 
-  // 🔥 Password strength
-  const calculatePasswordStrength = (password: string): number => {
-    let strength = 0;
-    if (password.length > 7) strength += 25;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
-    if (/[0-9]/.test(password)) strength += 25;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
-    return strength;
-  };
+    const [captcha, setCaptcha] = useState(generateCaptcha());
 
-  useEffect(() => {
-    setPasswordStrength(calculatePasswordStrength(formData.password));
-  }, [formData.password]);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: undefined }));
+    };
 
-  // 🔥 Handle input
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-    if (name === "phone") {
-      const onlyNumber = value.replace(/\D/g, "");
-      setFormData({ ...formData, phone: onlyNumber });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+        const newErrors: Errors = {};
 
-  // 🔥 Validasi
-  const validate = () => {
-    const newErrors: ErrorType = {};
+        // USERNAME
+        if (!formData.username.trim()) {
+            newErrors.username = 'Username tidak boleh kosong';
+        } else if (formData.username.length < 3) {
+            newErrors.username = 'Minimal 3 karakter';
+        }
 
-    if (!formData.username) {
-      newErrors.username = "Username wajib diisi";
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Username minimal 3 karakter";
-    } else if (formData.username.length > 8) {
-      newErrors.username = "Username maksimal 8 karakter";
-    }
+        // EMAIL
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email tidak boleh kosong';
+        } else if (!formData.email.includes('@')) {
+            newErrors.email = 'Format email tidak valid';
+        }
 
-    if (!formData.email) {
-      newErrors.email = "Email wajib diisi";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Format email tidak valid";
-    }
+        // PHONE
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Nomor telepon tidak boleh kosong';
+        } else if (!/^[0-9]+$/.test(formData.phone)) {
+            newErrors.phone = 'Harus angka';
+        }
 
-    if (!formData.phone) {
-      newErrors.phone = "Nomor telepon wajib diisi";
-    } else if (formData.phone.length < 10) {
-      newErrors.phone = "Nomor telepon minimal 10 karakter";
-    }
+        // PASSWORD
+        if (!formData.password) {
+            newErrors.password = 'Password tidak boleh kosong';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Minimal 6 karakter';
+        }
 
-    if (!formData.password) {
-      newErrors.password = "Password wajib diisi";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password minimal 8 karakter";
-    }
+        // CONFIRM PASSWORD
+        if (formData.confirmPassword !== formData.password) {
+            newErrors.confirmPassword = 'Password tidak sama';
+        }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Konfirmasi password wajib diisi";
-    } else if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Konfirmasi password tidak cocok";
-    }
+        // CAPTCHA
+        if (!formData.captchaInput.trim()) {
+            newErrors.captcha = 'Captcha belum diisi';
+        } else if (formData.captchaInput !== captcha) {
+            newErrors.captcha = 'Captcha salah';
+        }
 
-    if (!formData.captcha) {
-      newErrors.captcha = "Captcha wajib diisi";
-    } else if (formData.captcha !== captchaText) {
-      newErrors.captcha = "Captcha tidak valid";
-    }
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error("Registrasi gagal, cek input!");
+            return;
+        }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+        toast.success("Registrasi berhasil!");
+        router.push('/auth/login');
+    };
 
-  // 🔥 Submit
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    return (
+        <AuthFromWrapper title="Register">
 
-    if (validate()) {
-      const userData = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-      };
+            <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
-      localStorage.setItem("user", JSON.stringify(userData));
+                {/* USERNAME */}
+                <div className="space-y-1">
+                    <label className="text-sm">Username</label>
+                    <input
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Masukkan username"
+                    />
+                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+                </div>
 
-      alert("Register Berhasil!");
+                {/* EMAIL */}
+                <div className="space-y-1">
+                    <label className="text-sm">Email</label>
+                    <input
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Masukkan email"
+                    />
+                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                </div>
 
-      setFormData({
-        username: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-        captcha: "",
-      });
+                {/* PHONE */}
+                <div className="space-y-1">
+                    <label className="text-sm">Nomor Telepon</label>
+                    <input
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Masukkan nomor telepon"
+                    />
+                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+                </div>
 
-      generateCaptcha();
+                {/* PASSWORD */}
+                <div className="space-y-1">
+                    <label className="text-sm">Password</label>
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 pr-10 border rounded-lg"
+                            placeholder="Masukkan password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-3 flex items-center text-gray-400"
+                        >
+                            {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                        </button>
+                    </div>
+                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                </div>
 
-      window.location.href = "/auth/login";
-    }
-  };
+                {/* CONFIRM PASSWORD */}
+                <div className="space-y-1">
+                    <label className="text-sm">Konfirmasi Password</label>
+                    <div className="relative">
+                        <input
+                            type={showConfirm ? "text" : "password"}
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 pr-10 border rounded-lg"
+                            placeholder="Ulangi password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirm(!showConfirm)}
+                            className="absolute inset-y-0 right-3 flex items-center text-gray-400"
+                        >
+                            {showConfirm ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                        </button>
+                    </div>
+                    {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+                </div>
 
-  return (
-    <Container className="p-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <Form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm">
-            <h2 className="text-center mb-4">Register</h2>
+                {/* CAPTCHA */}
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <span className="bg-gray-200 px-3 py-1 rounded font-mono">{captcha}</span>
+                        <button
+                            type="button"
+                            onClick={() => setCaptcha(generateCaptcha())}
+                            className="text-blue-500"
+                        >
+                            ⟳
+                        </button>
+                    </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                isInvalid={!!errors.username}
-              />
-              <Form.Control.Feedback type="invalid">{errors.username}</Form.Control.Feedback>
-            </Form.Group>
+                    <input
+                        name="captchaInput"
+                        value={formData.captchaInput}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border rounded-lg"
+                        placeholder="Masukkan captcha"
+                    />
+                    {errors.captcha && <p className="text-red-500 text-sm">{errors.captcha}</p>}
+                </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                isInvalid={!!errors.email}
-              />
-              <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
-            </Form.Group>
+                {/* BUTTON */}
+                <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+                >
+                    Register
+                </button>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Nomor Telepon</Form.Label>
-              <Form.Control
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                isInvalid={!!errors.phone}
-              />
-              <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
-            </Form.Group>
+                <p className="text-center text-sm">
+                    Sudah punya akun?{' '}
+                    <Link href="/auth/login" className="text-blue-600">
+                        Login
+                    </Link>
+                </p>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                isInvalid={!!errors.password}
-              />
-              <ProgressBar now={passwordStrength} className="mt-2" label={`${passwordStrength}%`} />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Konfirmasi Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                isInvalid={!!errors.confirmPassword}
-              />
-              <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Captcha: {captchaText}</Form.Label>
-              <Form.Control
-                type="text"
-                name="captcha"
-                value={formData.captcha}
-                onChange={handleInputChange}
-                isInvalid={!!errors.captcha}
-              />
-              <Form.Control.Feedback type="invalid">{errors.captcha}</Form.Control.Feedback>
-            </Form.Group>
-
-            <Button type="submit" className="w-100 mt-3">
-              Register
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
-  );
+            </form>
+        </AuthFromWrapper>
+    );
 };
 
 export default RegisterPage;
