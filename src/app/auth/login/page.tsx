@@ -54,13 +54,13 @@ const LoginPage = () => {
         if (!formData.email.trim()) {
             newErrors.email = 'Email tidak boleh kosong';
         } else if (formData.email !== "3057@gmail.com") {
-            newErrors.email = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
+            newErrors.email = 'Email harus sesuai dengan format npm kalian (cth. 3057@gmail.com)';
         }
 
         if (!formData.password.trim()) {
             newErrors.password = 'Password tidak boleh kosong';
         } else if (formData.password !== "241713057") {
-            newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 220711905)';
+            newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 241713057)';
         }
 
         if (!formData.captchaInput.trim()) {
