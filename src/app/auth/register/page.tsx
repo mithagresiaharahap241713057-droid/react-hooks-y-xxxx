@@ -70,6 +70,7 @@ const RegisterPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: undefined }));
 
+        // realtime error text (tetap ada)
         if (name === "email") {
             if (value && !/\S+@\S+\.(com|net|co)/.test(value)) {
                 setErrors(prev => ({
@@ -91,10 +92,17 @@ const RegisterPage = () => {
             newErrors.username = 'Minimal 3 karakter';
         }
 
+        // 🔥 EMAIL VALIDATION + TOOLTIP HTML
         if (!formData.email.trim()) {
             newErrors.email = 'Email wajib diisi';
-        } else if (!formData.email.includes('@')) {
+        } else if (!/\S+@\S+\.(com|net|co)/.test(formData.email)) {
             newErrors.email = 'Format email tidak valid';
+
+            const emailInput = document.querySelector<HTMLInputElement>('input[name="email"]');
+            if (emailInput) {
+                emailInput.setCustomValidity("Sertakan '@' pada alamat email dan domain (.com/.net/.co)");
+                emailInput.reportValidity(); // 🔥 munculin tooltip browser
+            }
         }
 
         if (!formData.phone.trim()) {
@@ -118,7 +126,7 @@ const RegisterPage = () => {
         if (!formData.captchaInput.trim()) {
             newErrors.captcha = 'Captcha belum diisi';
         } else if (formData.captchaInput !== captcha) {
-            newErrors.captcha = 'Captcha tidak sesuai';
+            newErrors.captcha = 'Harus sesuai dengan captcha yang ditampilkan';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -149,32 +157,21 @@ const RegisterPage = () => {
                 </div>
 
                 {/* EMAIL */}
-                <div className="relative">
+                <div>
                     <label>Email</label>
                     <input
-                    type ="text"
-                    name="email"
-                    placeholder="Masukkan email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    autoComplete="off"
-                    className="peer w-full px-4 py-2 border rounded-lg"
+                        type="email"
+                        name="email"
+                        placeholder="Masukkan email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        onInput={(e) => e.currentTarget.setCustomValidity("")} // reset tooltip
+                        className="w-full px-4 py-2 border rounded-lg"
                     />
-                    {/* 🔥 ERROR TEXT (yang lama tetap) */}
                     {errors.email && (
                         <p className="text-red-500 text-sm">{errors.email}</p>
                     )}
-                    {/* 🔥 TOOLTIP HOVER */}
-                    {errors.email === "Format email tidak valid" && (
-                        <div className="absolute left-0 top-full mt-1 
-                                        bg-red-100 text-red-600 text-xs 
-                                        px-3 py-1 rounded shadow 
-                                        opacity-0 group-hover:opacity-100 
-                                        transitio duration-200">
-                            Sertakan '@' pada alamat email dan domain (.com/.net/.co)
-                        </div>
-                        )}
-                    </div>
+                </div>
 
                 {/* PHONE */}
                 <div>
@@ -254,6 +251,7 @@ const RegisterPage = () => {
 
                 {/* CAPTCHA */}
                 <div>
+                    <label>Captcha:</label>
                     <div className="flex gap-2">
                         <span className="bg-gray-200 px-3 py-1 rounded">{captcha}</span>
                         <button type="button" onClick={() => setCaptcha(generateCaptcha())}>⟳</button>
