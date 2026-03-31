@@ -152,10 +152,12 @@ const RegisterPage = () => {
                 <div className="relative">
                     <label>Email</label>
                     <input
+                    type ="text"
                     name="email"
                     placeholder="Masukkan email"
                     value={formData.email}
                     onChange={handleChange}
+                    autoComplete="off"
                     className="peer w-full px-4 py-2 border rounded-lg"
                     />
                     {/* 🔥 ERROR TEXT (yang lama tetap) */}
