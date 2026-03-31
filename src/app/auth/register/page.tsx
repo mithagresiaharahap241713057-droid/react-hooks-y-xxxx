@@ -94,7 +94,7 @@ const RegisterPage = () => {
         }
 
         if (!formData.password) {
-            newErrors.password = 'Password tidak boleh kosong';
+            newErrors.password = 'Password wajib diisi';
         } else if (formData.password.length < 8) {
             newErrors.password = 'Minimal 8 karakter';
         }
@@ -209,15 +209,16 @@ const RegisterPage = () => {
                         </button>
                     </div>
 
-                    {/* 🔥 CONFIRM STRENGTH */}
+                    {formData.password && (
                     <div className="mt-1">
                         <div className="w-full h-2 bg-gray-200 rounded">
                             <div className="h-2 bg-blue-500 rounded" style={{ width: `${confirmStrength}%` }} />
                         </div>
                         <p className="text-sm">Strength: {confirmStrength}%</p>
                     </div>
+                    )}
 
-                    {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
 
                 {/* CAPTCHA */}
