@@ -43,7 +43,7 @@ const RegisterPage = () => {
     const [showConfirm, setShowConfirm] = useState(false);
 
     const [strength, setStrength] = useState(0);
-    const [confirmStrength, setConfirmStrength] = useState(0); // 🔥 NEW
+    const [confirmStrength, setConfirmStrength] = useState(0);
 
     const generateCaptcha = () => {
         return Math.random().toString(36).substring(2, 8);
@@ -51,7 +51,6 @@ const RegisterPage = () => {
 
     const [captcha, setCaptcha] = useState(generateCaptcha());
 
-    // 🔥 FUNCTION BIAR GA DOUBLE
     const calculateStrength = (password: string) => {
         return Math.min(
             (password.length > 7 ? 25 : 0) +
@@ -61,27 +60,25 @@ const RegisterPage = () => {
         );
     };
 
-    // 🔥 USE EFFECT UNTUK KEDUA PASSWORD
     useEffect(() => {
         setStrength(calculateStrength(formData.password));
         setConfirmStrength(calculateStrength(formData.confirmPassword));
     }, [formData.password, formData.confirmPassword]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: undefined }));
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: undefined }));
 
-    // ✅ REALTIME EMAIL VALIDATION (TAMBAHAN)
-    if (name === "email") {
-        if (value && !/\S+@\S+\.(com|net|co)/.test(value)) {
-            setErrors(prev => ({
-                ...prev,
-                email: "Format email tidak valid"
-            }));
+        if (name === "email") {
+            if (value && !/\S+@\S+\.(com|net|co)/.test(value)) {
+                setErrors(prev => ({
+                    ...prev,
+                    email: "Format email tidak valid"
+                }));
+            }
         }
-    }
-};
+    };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -143,9 +140,10 @@ const RegisterPage = () => {
                     <label>Username</label>
                     <input
                         name="username"
+                        placeholder="Masukkan username"
                         value={formData.username}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
                     />
                     {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
                 </div>
@@ -155,14 +153,14 @@ const RegisterPage = () => {
                     <label>Email</label>
                     <input
                         type="email"
+                        placeholder="Masukkan email"
                         pattern=".+@(.*\.(com|net|co))"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        
-                        className="w-full px-4 py-2 border rounded-lg"
-                        />
-                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
+                    />
+                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
 
                 {/* PHONE */}
@@ -170,6 +168,7 @@ const RegisterPage = () => {
                     <label>Nomor Telepon</label>
                     <input
                         name="phone"
+                        placeholder="Masukkan nomor telepon"
                         inputMode="numeric"
                         value={formData.phone}
                         onChange={(e) => {
@@ -177,7 +176,7 @@ const RegisterPage = () => {
                             setFormData(prev => ({ ...prev, phone: onlyNumbers }));
                             setErrors(prev => ({ ...prev, phone: undefined }));
                         }}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
                     />
                     {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                 </div>
@@ -189,21 +188,23 @@ const RegisterPage = () => {
                         <input
                             type={showPassword ? "text" : "password"}
                             name="password"
+                            placeholder="Masukkan password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg"
+                            className="w-full px-4 py-2 pr-10 border rounded-lg placeholder-gray-400"
                         />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5">
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
+
                     {formData.password && (
-                    <div className="mt-1">
-                        <div className="w-full h-2 bg-gray-200 rounded">
-                            <div className="h-2 bg-blue-500 rounded" style={{ width: `${strength}%` }} />
+                        <div className="mt-1">
+                            <div className="w-full h-2 bg-gray-200 rounded">
+                                <div className="h-2 bg-blue-500 rounded" style={{ width: `${strength}%` }} />
+                            </div>
+                            <p className="text-sm">Strength: {strength}%</p>
                         </div>
-                        <p className="text-sm">Strength: {strength}%</p>
-                    </div>
                     )}
 
                     {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
@@ -216,9 +217,10 @@ const RegisterPage = () => {
                         <input
                             type={showConfirm ? "text" : "password"}
                             name="confirmPassword"
+                            placeholder="Masukkan ulang password"
                             value={formData.confirmPassword}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg"
+                            className="w-full px-4 py-2 pr-10 border rounded-lg placeholder-gray-400"
                         />
                         <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-2.5">
                             {showConfirm ? <FaEyeSlash /> : <FaEye />}
@@ -226,12 +228,12 @@ const RegisterPage = () => {
                     </div>
 
                     {formData.password && (
-                    <div className="mt-1">
-                        <div className="w-full h-2 bg-gray-200 rounded">
-                            <div className="h-2 bg-blue-500 rounded" style={{ width: `${confirmStrength}%` }} />
+                        <div className="mt-1">
+                            <div className="w-full h-2 bg-gray-200 rounded">
+                                <div className="h-2 bg-blue-500 rounded" style={{ width: `${confirmStrength}%` }} />
+                            </div>
+                            <p className="text-sm">Strength: {confirmStrength}%</p>
                         </div>
-                        <p className="text-sm">Strength: {confirmStrength}%</p>
-                    </div>
                     )}
 
                     {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
@@ -246,9 +248,10 @@ const RegisterPage = () => {
 
                     <input
                         name="captchaInput"
+                        placeholder="Masukkan captcha"
                         value={formData.captchaInput}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
                     />
                     {errors.captcha && <p className="text-red-500 text-sm">{errors.captcha}</p>}
                 </div>
@@ -256,7 +259,9 @@ const RegisterPage = () => {
                 <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
                     Register
                 </button>
+
                 <SocialAuth />
+
                 <p className="text-center text-sm">
                     Sudah punya akun? <Link href="/auth/login" className="text-blue-600">Login</Link>
                 </p>
