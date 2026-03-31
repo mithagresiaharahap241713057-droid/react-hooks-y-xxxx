@@ -88,8 +88,8 @@ const RegisterPage = () => {
 
         if (!formData.username.trim()) {
             newErrors.username = 'Username wajib diisi';
-        } else if (formData.username.length < 3) {
-            newErrors.username = 'Minimal 3 karakter';
+        } else if (formData.username.length < 3 || formData.username.length > 8) {
+            newErrors.username = 'Username harus 3-8 karakter';
         }
 
         // 🔥 EMAIL VALIDATION + TOOLTIP HTML
@@ -101,7 +101,7 @@ const RegisterPage = () => {
             const emailInput = document.querySelector<HTMLInputElement>('input[name="email"]');
             if (emailInput) {
                 emailInput.setCustomValidity("Sertakan '@' pada alamat email dan domain (.com/.net/.co)");
-                emailInput.reportValidity(); // 🔥 munculin tooltip browser
+                emailInput.reportValidity(); 
             }
         }
 
@@ -114,7 +114,7 @@ const RegisterPage = () => {
         if (!formData.password) {
             newErrors.password = 'Password wajib diisi';
         } else if (formData.password.length < 8) {
-            newErrors.password = 'Minimal 8 karakter';
+            newErrors.password = 'Password Minimal 8 karakter';
         }
 
         if (!formData.confirmPassword) {
