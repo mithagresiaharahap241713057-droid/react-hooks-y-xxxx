@@ -60,21 +60,21 @@ const RegisterPage = () => {
 
         // USERNAME
         if (!formData.username.trim()) {
-            newErrors.username = 'Username tidak boleh kosong';
+            newErrors.username = 'Username wajib diisi';
         } else if (formData.username.length < 3) {
             newErrors.username = 'Minimal 3 karakter';
         }
 
         // EMAIL
         if (!formData.email.trim()) {
-            newErrors.email = 'Email tidak boleh kosong';
+            newErrors.email = 'Email wajib diisi';
         } else if (!formData.email.includes('@')) {
             newErrors.email = 'Format email tidak valid';
         }
 
         // PHONE
         if (!formData.phone.trim()) {
-            newErrors.phone = 'Nomor telepon tidak boleh kosong';
+            newErrors.phone = 'Nomor telepon wajib diisi';
         } else if (!/^[0-9]+$/.test(formData.phone)) {
             newErrors.phone = 'Harus angka';
         }
@@ -140,16 +140,20 @@ const RegisterPage = () => {
                 </div>
 
                 {/* PHONE */}
-                <div className="space-y-1">
-                    <label className="text-sm">Nomor Telepon</label>
+                <div className="space-y-2">
+                    <label>Nomor Telepon</label>
                     <input
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
-                        placeholder="Masukkan nomor telepon"
-                    />
-                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+                    name="phone"
+                inputMode="numeric"
+                value={formData.phone}
+                onChange={(e) => {
+                    const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
+                    setFormData(prev => ({ ...prev, phone: onlyNumbers }));
+                    setErrors(prev => ({ ...prev, phone: undefined }));
+                }}
+                className="w-full px-4 py-2 border rounded-lg"
+                placeholder="Masukkan nomor telepon"
+                />
                 </div>
 
                 {/* PASSWORD */}
