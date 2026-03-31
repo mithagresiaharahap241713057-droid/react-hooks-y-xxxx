@@ -12,8 +12,8 @@ export default function NotAuthorized() {
         {/* Kontainer Gambar/Video */}
         <div className="w-full aspect-video rounded-xl overflow-hidden mb-6 bg-black shadow-inner">
           <img 
-            src="/api/placeholder/400/225" // Ganti dengan path file video/gambar kamu
-            alt="Access Denied Illustration"
+            src="/MITHA.gif" // Ganti dengan path file video/gambar kamu
+            alt="ketikkan keyboard"
             className="w-full h-full object-cover"
           />
         </div>
