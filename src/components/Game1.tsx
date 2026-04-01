@@ -11,19 +11,16 @@ export default function Game1() {
     const [score, setScore] = useState(0);
     const [time, setTime] = useState(30);
     const [gameActive, setGameActive] = useState(false);
-    const [paused, setPaused] = useState(false);
     const [highScore, setHighScore] = useState(0);
     const [speed, setSpeed] = useState(700);
 
-    // LOAD HIGHSCORE
     useEffect(() => {
         const saved = localStorage.getItem("whack_highscore");
         if (saved) setHighScore(Number(saved));
     }, []);
 
-    // MOLE SPAWN
     useEffect(() => {
-        if (!gameActive || paused) return;
+        if (!gameActive) return;
 
         const moleTimer = setInterval(() => {
             const randomIndex = Math.floor(Math.random() * holes.length);
@@ -31,11 +28,10 @@ export default function Game1() {
         }, speed);
 
         return () => clearInterval(moleTimer);
-    }, [gameActive, paused, speed]);
+    }, [gameActive, speed]);
 
-    // TIMER
     useEffect(() => {
-        if (!gameActive || paused) return;
+        if (!gameActive) return;
 
         const countdown = setInterval(() => {
             setTime((prev) => {
@@ -45,7 +41,6 @@ export default function Game1() {
                     return 0;
                 }
 
-                // 🔥 speed makin cepat tiap 5 detik
                 if (prev % 5 === 0) {
                     setSpeed((s) => Math.max(300, s - 50));
                 }
@@ -55,14 +50,13 @@ export default function Game1() {
         }, 1000);
 
         return () => clearInterval(countdown);
-    }, [gameActive, paused]);
+    }, [gameActive]);
 
+    // ❌ TANPA NOTIF HIT
     const hitMole = (index: number) => {
-        if (index === moleIndex && gameActive && !paused) {
+        if (index === moleIndex && gameActive) {
             setScore((prev) => prev + 1);
             setMoleIndex(null);
-
-            toast.success("🎯 Hit!", { autoClose: 500 });
         }
     };
 
@@ -71,14 +65,13 @@ export default function Game1() {
         setTime(30);
         setSpeed(700);
         setGameActive(true);
-        setPaused(false);
 
         toast.info("⏱️ Game dimulai!");
     };
 
     const endGame = () => {
         setGameActive(false);
-        setPaused(false);
+        setMoleIndex(null);
 
         toast.info("⏰ Waktu habis!");
 
@@ -89,53 +82,78 @@ export default function Game1() {
         }
     };
 
-    const resetGame = () => {
-        setScore(0);
-        setTime(30);
-        setGameActive(false);
-        setPaused(false);
-        setSpeed(700);
-        setMoleIndex(null);
-
-        toast.info("Game di-reset");
-    };
-
-    const togglePause = () => {
-        setPaused(!paused);
-        toast.info(paused ? "▶️ Resume" : "⏸️ Pause");
-    };
-
     return (
         <div className="game-container">
             <div className="game-panel">
                 <h1 className="game-title">🎮 Tap the Mouse</h1>
 
-                <div className="game-stats">
-                    <div>🏆 Score: {score}</div>
-                    <div>⏱️ Time: {time}</div>
+                {/* ✅ UI SESUAI GAMBAR */}
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "15px",
+                        marginBottom: "15px"
+                    }}
+                >
+                    <div
+                        style={{
+                            background: "#43a047",
+                            color: "white",
+                            padding: "10px 18px",
+                            borderRadius: "12px",
+                            fontWeight: "bold",
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
+                        }}
+                    >
+                        🏆 Score: {score}
+                    </div>
+
+                    <div
+                        style={{
+                            background: "#ff7043",
+                            color: "white",
+                            padding: "10px 18px",
+                            borderRadius: "12px",
+                            fontWeight: "bold",
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
+                        }}
+                    >
+                        ⏱️ Time: {time}
+                    </div>
                 </div>
 
-                <div>⭐ High Score: {highScore}</div>
+                <div
+                    style={{
+                        marginBottom: "15px",
+                        fontWeight: "600",
+                        fontSize: "16px"
+                    }}
+                >
+                    ⭐ High Score: {highScore}
+                </div>
 
                 {!gameActive && (
-                    <button className="start-btn" onClick={startGame}>
+                    <button
+                        className="start-btn"
+                        style={{
+                            background: "linear-gradient(90deg, #5c6bc0, #7e57c2)",
+                            color: "white",
+                            padding: "12px 25px",
+                            borderRadius: "14px",
+                            border: "none",
+                            fontWeight: "bold",
+                            fontSize: "16px",
+                            boxShadow: "0 3px 8px rgba(0,0,0,0.3)"
+                        }}
+                        onClick={startGame}
+                    >
                         🚀 Start Game
                     </button>
                 )}
-
-                {gameActive && (
-                    <div className="flex gap-2 mt-4">
-                        <button onClick={togglePause}>
-                            {paused ? "▶️ Resume" : "⏸️ Pause"}
-                        </button>
-
-                        <button onClick={resetGame}>
-                            🔄 Reset
-                        </button>
-                    </div>
-                )}
             </div>
 
+            {/* ❗ GRID TIDAK DIUBAH */}
             <div className="game-grid">
                 {holes.map((_, index) => (
                     <div
@@ -143,7 +161,7 @@ export default function Game1() {
                         onClick={() => hitMole(index)}
                         className="hole"
                     >
-                        {moleIndex === index && !paused && (
+                        {moleIndex === index && (
                             <div className="mole">🐹</div>
                         )}
                     </div>
