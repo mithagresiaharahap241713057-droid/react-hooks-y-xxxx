@@ -1,61 +1,200 @@
-<div className="game-panel">
-    <h1 className="game-title">🎮 Tap the Mouse</h1>
+"use client";
 
-    {/* STATS BARU */}
-    <div className="game-stats" style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "10px" }}>
-        <div style={{
-            background: "#2e7d32",
-            color: "white",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            fontWeight: "bold"
-        }}>
-            🏆 Score: {score}
+import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+export default function Game1() {
+    const holes = Array.from({ length: 9 });
+
+    const [moleIndex, setMoleIndex] = useState<number | null>(null);
+    const [score, setScore] = useState(0);
+    const [time, setTime] = useState(30);
+    const [gameActive, setGameActive] = useState(false);
+    const [paused, setPaused] = useState(false);
+    const [highScore, setHighScore] = useState(0);
+    const [speed, setSpeed] = useState(700);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("whack_highscore");
+        if (saved) setHighScore(Number(saved));
+    }, []);
+
+    useEffect(() => {
+        if (!gameActive || paused) return;
+
+        const moleTimer = setInterval(() => {
+            const randomIndex = Math.floor(Math.random() * holes.length);
+            setMoleIndex(randomIndex);
+        }, speed);
+
+        return () => clearInterval(moleTimer);
+    }, [gameActive, paused, speed]);
+
+    useEffect(() => {
+        if (!gameActive || paused) return;
+
+        const countdown = setInterval(() => {
+            setTime((prev) => {
+                if (prev <= 1) {
+                    clearInterval(countdown);
+                    endGame();
+                    return 0;
+                }
+
+                if (prev % 5 === 0) {
+                    setSpeed((s) => Math.max(300, s - 50));
+                }
+
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(countdown);
+    }, [gameActive, paused]);
+
+    // ❌ HIT TANPA NOTIF
+    const hitMole = (index: number) => {
+        if (index === moleIndex && gameActive && !paused) {
+            setScore((prev) => prev + 1);
+            setMoleIndex(null);
+        }
+    };
+
+    const startGame = () => {
+        setScore(0);
+        setTime(30);
+        setSpeed(700);
+        setGameActive(true);
+        setPaused(false);
+
+        toast.info("⏱️ Game dimulai!");
+    };
+
+    const endGame = () => {
+        setGameActive(false);
+        setPaused(false);
+
+        toast.info("⏰ Waktu habis!");
+
+        if (score > highScore) {
+            localStorage.setItem("whack_highscore", score.toString());
+            setHighScore(score);
+            toast.success("🔥 New High Score!");
+        }
+    };
+
+    const resetGame = () => {
+        setScore(0);
+        setTime(30);
+        setGameActive(false);
+        setPaused(false);
+        setSpeed(700);
+        setMoleIndex(null);
+
+        toast.info("Game di-reset");
+    };
+
+    const togglePause = () => {
+        setPaused(!paused);
+        toast.info(paused ? "▶️ Resume" : "⏸️ Pause");
+    };
+
+    return (
+        <div className="game-container">
+            <div className="game-panel">
+                <h1 className="game-title">🎮 Tap the Mouse</h1>
+
+                {/* ✅ UI BARU (doang yg diubah) */}
+                <div
+                    className="game-stats"
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "10px",
+                        marginBottom: "10px"
+                    }}
+                >
+                    <div
+                        style={{
+                            background: "#2e7d32",
+                            color: "white",
+                            padding: "8px 14px",
+                            borderRadius: "10px",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        🏆 Score: {score}
+                    </div>
+
+                    <div
+                        style={{
+                            background: "#ef6c00",
+                            color: "white",
+                            padding: "8px 14px",
+                            borderRadius: "10px",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        ⏱️ Time: {time}
+                    </div>
+                </div>
+
+                <div
+                    style={{
+                        marginBottom: "10px",
+                        fontWeight: "600"
+                    }}
+                >
+                    ⭐ High Score: {highScore}
+                </div>
+
+                {!gameActive && (
+                    <button
+                        className="start-btn"
+                        style={{
+                            background: "linear-gradient(90deg, #6a5acd, #7b1fa2)",
+                            color: "white",
+                            padding: "10px 20px",
+                            borderRadius: "12px",
+                            border: "none",
+                            fontWeight: "bold"
+                        }}
+                        onClick={startGame}
+                    >
+                        🚀 Start Game
+                    </button>
+                )}
+
+                {gameActive && (
+                    <div className="flex gap-2 mt-4">
+                        <button onClick={togglePause}>
+                            {paused ? "▶️ Resume" : "⏸️ Pause"}
+                        </button>
+
+                        <button onClick={resetGame}>
+                            🔄 Reset
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* ❗ INI TIDAK DIUBAH */}
+            <div className="game-grid">
+                {holes.map((_, index) => (
+                    <div
+                        key={index}
+                        onClick={() => hitMole(index)}
+                        className="hole"
+                    >
+                        {moleIndex === index && !paused && (
+                            <div className="mole">🐹</div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            <ToastContainer position="top-center" autoClose={1000} />
         </div>
-
-        <div style={{
-            background: "#ef6c00",
-            color: "white",
-            padding: "8px 12px",
-            borderRadius: "10px",
-            fontWeight: "bold"
-        }}>
-            ⏱️ Time: {time}
-        </div>
-    </div>
-
-    {/* HIGH SCORE */}
-    <div style={{ marginBottom: "10px", fontWeight: "600" }}>
-        ⭐ High Score: {highScore}
-    </div>
-
-    {/* BUTTON */}
-    {!gameActive && (
-        <button
-            className="start-btn"
-            style={{
-                background: "linear-gradient(90deg, #6a5acd, #7b1fa2)",
-                color: "white",
-                padding: "10px 20px",
-                borderRadius: "12px",
-                border: "none",
-                fontWeight: "bold"
-            }}
-            onClick={startGame}
-        >
-            🚀 Start Game
-        </button>
-    )}
-
-    {gameActive && (
-        <div className="flex gap-2 mt-4">
-            <button onClick={togglePause}>
-                {paused ? "▶️ Resume" : "⏸️ Pause"}
-            </button>
-
-            <button onClick={resetGame}>
-                🔄 Reset
-            </button>
-        </div>
-    )}
-</div>
+    );
+}
