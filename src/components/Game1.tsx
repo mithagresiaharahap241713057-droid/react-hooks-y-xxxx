@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function Game1() {
     const holes = Array.from({ length: 9 });
@@ -45,7 +43,6 @@ export default function Game1() {
                     return 0;
                 }
 
-                // 🔥 speed makin cepat tiap 5 detik
                 if (prev % 5 === 0) {
                     setSpeed((s) => Math.max(300, s - 50));
                 }
@@ -57,12 +54,11 @@ export default function Game1() {
         return () => clearInterval(countdown);
     }, [gameActive, paused]);
 
+    // ❌ HIT TANPA TOAST
     const hitMole = (index: number) => {
         if (index === moleIndex && gameActive && !paused) {
             setScore((prev) => prev + 1);
             setMoleIndex(null);
-
-            toast.success("🎯 Hit!", { autoClose: 500 });
         }
     };
 
@@ -72,85 +68,67 @@ export default function Game1() {
         setSpeed(700);
         setGameActive(true);
         setPaused(false);
-
-        toast.info("⏱️ Game dimulai!");
     };
 
     const endGame = () => {
         setGameActive(false);
         setPaused(false);
 
-        toast.info("⏰ Waktu habis!");
-
         if (score > highScore) {
             localStorage.setItem("whack_highscore", score.toString());
             setHighScore(score);
-            toast.success("🔥 New High Score!");
         }
     };
 
-    const resetGame = () => {
-        setScore(0);
-        setTime(30);
-        setGameActive(false);
-        setPaused(false);
-        setSpeed(700);
-        setMoleIndex(null);
-
-        toast.info("Game di-reset");
-    };
-
-    const togglePause = () => {
-        setPaused(!paused);
-        toast.info(paused ? "▶️ Resume" : "⏸️ Pause");
-    };
-
     return (
-        <div className="game-container">
-            <div className="game-panel">
-                <h1 className="game-title">🎮 Tap the Mouse</h1>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-blue-600">
+            
+            <h1 className="text-4xl font-bold mb-6">Selamat Datang!</h1>
 
-                <div className="game-stats">
-                    <div>🏆 Score: {score}</div>
-                    <div>⏱️ Time: {time}</div>
+            <div className="bg-gray-200 p-8 rounded-3xl shadow-lg text-center w-[350px]">
+                
+                <h2 className="text-2xl font-bold mb-4">🎮 Tap the Mouse</h2>
+
+                {/* STATS */}
+                <div className="flex justify-center gap-4 mb-4">
+                    <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
+                        🏆 Score: {score}
+                    </div>
+                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold">
+                        ⏱️ Time: {time}
+                    </div>
                 </div>
 
-                <div>⭐ High Score: {highScore}</div>
+                <div className="mb-4 font-semibold">
+                    ⭐ High Score: {highScore}
+                </div>
 
                 {!gameActive && (
-                    <button className="start-btn" onClick={startGame}>
+                    <button
+                        onClick={startGame}
+                        className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-6 py-2 rounded-xl font-semibold"
+                    >
                         🚀 Start Game
                     </button>
                 )}
-
-                {gameActive && (
-                    <div className="flex gap-2 mt-4">
-                        <button onClick={togglePause}>
-                            {paused ? "▶️ Resume" : "⏸️ Pause"}
-                        </button>
-
-                        <button onClick={resetGame}>
-                            🔄 Reset
-                        </button>
-                    </div>
-                )}
             </div>
 
-            <div className="game-grid">
-                {holes.map((_, index) => (
-                    <div
-                        key={index}
-                        onClick={() => hitMole(index)}
-                        className="hole"
-                    >
-                        {moleIndex === index && !paused && (
-                            <div className="mole">🐹</div>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            <ToastContainer position="top-center" autoClose={1000} />
+            {/* GRID */}
+            {gameActive && (
+                <div className="grid grid-cols-3 gap-4 mt-6">
+                    {holes.map((_, index) => (
+                        <div
+                            key={index}
+                            onClick={() => hitMole(index)}
+                            className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+                        >
+                            {moleIndex === index && !paused && (
+                                <span className="text-2xl">🐹</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
