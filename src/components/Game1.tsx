@@ -11,7 +11,6 @@ export default function Game1() {
     const [score, setScore] = useState(0);
     const [time, setTime] = useState(30);
     const [gameActive, setGameActive] = useState(false);
-    const [paused, setPaused] = useState(false);
     const [highScore, setHighScore] = useState(0);
     const [speed, setSpeed] = useState(700);
 
@@ -23,7 +22,7 @@ export default function Game1() {
 
     // MOLE SPAWN
     useEffect(() => {
-        if (!gameActive || paused) return;
+        if (!gameActive) return;
 
         const moleTimer = setInterval(() => {
             const randomIndex = Math.floor(Math.random() * holes.length);
@@ -31,11 +30,11 @@ export default function Game1() {
         }, speed);
 
         return () => clearInterval(moleTimer);
-    }, [gameActive, paused, speed]);
+    }, [gameActive, speed]);
 
     // TIMER
     useEffect(() => {
-        if (!gameActive || paused) return;
+        if (!gameActive) return;
 
         const countdown = setInterval(() => {
             setTime((prev) => {
@@ -55,10 +54,10 @@ export default function Game1() {
         }, 1000);
 
         return () => clearInterval(countdown);
-    }, [gameActive, paused]);
+    }, [gameActive]);
 
     const hitMole = (index: number) => {
-        if (index === moleIndex && gameActive && !paused) {
+        if (index === moleIndex && gameActive) {
             setScore((prev) => prev + 1);
             setMoleIndex(null);
 
@@ -71,14 +70,13 @@ export default function Game1() {
         setTime(30);
         setSpeed(700);
         setGameActive(true);
-        setPaused(false);
 
         toast.info("⏱️ Game dimulai!");
     };
 
     const endGame = () => {
         setGameActive(false);
-        setPaused(false);
+        setMoleIndex(null);
 
         toast.info("⏰ Waktu habis!");
 
@@ -87,22 +85,6 @@ export default function Game1() {
             setHighScore(score);
             toast.success("🔥 New High Score!");
         }
-    };
-
-    const resetGame = () => {
-        setScore(0);
-        setTime(30);
-        setGameActive(false);
-        setPaused(false);
-        setSpeed(700);
-        setMoleIndex(null);
-
-        toast.info("Game di-reset");
-    };
-
-    const togglePause = () => {
-        setPaused(!paused);
-        toast.info(paused ? "▶️ Resume" : "⏸️ Pause");
     };
 
     return (
@@ -122,18 +104,6 @@ export default function Game1() {
                         🚀 Start Game
                     </button>
                 )}
-
-                {gameActive && (
-                    <div className="flex gap-2 mt-4">
-                        <button onClick={togglePause}>
-                            {paused ? "▶️ Resume" : "⏸️ Pause"}
-                        </button>
-
-                        <button onClick={resetGame}>
-                            🔄 Reset
-                        </button>
-                    </div>
-                )}
             </div>
 
             <div className="game-grid">
@@ -143,7 +113,7 @@ export default function Game1() {
                         onClick={() => hitMole(index)}
                         className="hole"
                     >
-                        {moleIndex === index && !paused && (
+                        {moleIndex === index && (
                             <div className="mole">🐹</div>
                         )}
                     </div>
