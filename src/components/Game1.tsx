@@ -15,11 +15,13 @@ export default function Game1() {
     const [highScore, setHighScore] = useState(0);
     const [speed, setSpeed] = useState(700);
 
+    // LOAD HIGHSCORE
     useEffect(() => {
         const saved = localStorage.getItem("whack_highscore");
         if (saved) setHighScore(Number(saved));
     }, []);
 
+    // MOLE SPAWN
     useEffect(() => {
         if (!gameActive || paused) return;
 
@@ -31,6 +33,7 @@ export default function Game1() {
         return () => clearInterval(moleTimer);
     }, [gameActive, paused, speed]);
 
+    // TIMER
     useEffect(() => {
         if (!gameActive || paused) return;
 
@@ -42,6 +45,7 @@ export default function Game1() {
                     return 0;
                 }
 
+                // 🔥 speed makin cepat tiap 5 detik
                 if (prev % 5 === 0) {
                     setSpeed((s) => Math.max(300, s - 50));
                 }
@@ -53,11 +57,12 @@ export default function Game1() {
         return () => clearInterval(countdown);
     }, [gameActive, paused]);
 
-    // ❌ HIT TANPA NOTIF
     const hitMole = (index: number) => {
         if (index === moleIndex && gameActive && !paused) {
             setScore((prev) => prev + 1);
             setMoleIndex(null);
+
+            toast.success("🎯 Hit!", { autoClose: 500 });
         }
     };
 
@@ -105,63 +110,15 @@ export default function Game1() {
             <div className="game-panel">
                 <h1 className="game-title">🎮 Tap the Mouse</h1>
 
-                {/* ✅ UI BARU (doang yg diubah) */}
-                <div
-                    className="game-stats"
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "10px",
-                        marginBottom: "10px"
-                    }}
-                >
-                    <div
-                        style={{
-                            background: "#2e7d32",
-                            color: "white",
-                            padding: "8px 14px",
-                            borderRadius: "10px",
-                            fontWeight: "bold"
-                        }}
-                    >
-                        🏆 Score: {score}
-                    </div>
-
-                    <div
-                        style={{
-                            background: "#ef6c00",
-                            color: "white",
-                            padding: "8px 14px",
-                            borderRadius: "10px",
-                            fontWeight: "bold"
-                        }}
-                    >
-                        ⏱️ Time: {time}
-                    </div>
+                <div className="game-stats">
+                    <div>🏆 Score: {score}</div>
+                    <div>⏱️ Time: {time}</div>
                 </div>
 
-                <div
-                    style={{
-                        marginBottom: "10px",
-                        fontWeight: "600"
-                    }}
-                >
-                    ⭐ High Score: {highScore}
-                </div>
+                <div>⭐ High Score: {highScore}</div>
 
                 {!gameActive && (
-                    <button
-                        className="start-btn"
-                        style={{
-                            background: "linear-gradient(90deg, #6a5acd, #7b1fa2)",
-                            color: "white",
-                            padding: "10px 20px",
-                            borderRadius: "12px",
-                            border: "none",
-                            fontWeight: "bold"
-                        }}
-                        onClick={startGame}
-                    >
+                    <button className="start-btn" onClick={startGame}>
                         🚀 Start Game
                     </button>
                 )}
@@ -179,7 +136,6 @@ export default function Game1() {
                 )}
             </div>
 
-            {/* ❗ INI TIDAK DIUBAH */}
             <div className="game-grid">
                 {holes.map((_, index) => (
                     <div
