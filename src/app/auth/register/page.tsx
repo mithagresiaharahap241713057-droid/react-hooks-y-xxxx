@@ -1,293 +1,143 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import Link from 'next/link';
-import { toast } from 'react-toastify';
+import AuthFormWrapper from '../../../components/AuthFromWrapper';
 import SocialAuth from '../../../components/SocialAuth';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from 'react-toastify';
 
-interface FormData {
-    username: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirmPassword: string;
-    captchaInput: string;
-}
+type RegisterFormData = {
+  username: string;
+  email: string;
+  nomorTelp: string;
+  password: string;
+  confirmPassword: string;
+  captcha: string;
+};
 
-interface Errors {
-    username?: string;
-    email?: string;
-    phone?: string;
-    password?: string;
-    confirmPassword?: string;
-    captcha?: string;
-}
+const DEFAULT_CAPTCHA = 'AbCdEf';
 
 const RegisterPage = () => {
-    const router = useRouter();
+  const router = useRouter();
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<RegisterFormData>();
+  const [captchaInput, setCaptchaInput] = useState('');
 
-    const [formData, setFormData] = useState<FormData>({
-        username: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-        captchaInput: ''
-    });
+  const password = watch('password', '');
+  const confirmPassword = watch('confirmPassword', '');
 
-    const [errors, setErrors] = useState<Errors>({});
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
+  const onSubmit = (data: RegisterFormData) => {
+    if (data.password !== data.confirmPassword) {
+      toast.error('Konfirmasi password tidak cocok', { theme: 'dark' });
+      return;
+    }
 
-    const [strength, setStrength] = useState(0);
-    const [confirmStrength, setConfirmStrength] = useState(0);
+    if (captchaInput !== DEFAULT_CAPTCHA) {
+      toast.error('Captcha salah', { theme: 'dark' });
+      return;
+    }
 
-    const generateCaptcha = () => {
-        return Math.random().toString(36).substring(2, 8);
-    };
+    toast.success('Register Berhasil!', { theme: 'dark', position: 'top-right' });
+    router.push('/auth/login');
+  };
 
-    const [captcha, setCaptcha] = useState(generateCaptcha());
+  return (
+    <AuthFormWrapper title="Register">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 w-full">
+        
+        <div className="space-y-2">
+          <label htmlFor="username" className="text-sm font-medium text-gray-700">
+            Username <span className="text-gray-500 text-xs">(max 8 karakter)</span>
+          </label>
+          <input
+            id="username"
+            {...register('username', { required: 'Username wajib diisi' })}
+            className={`w-full px-4 py-2.5 rounded-lg border ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukkan username"
+          />
+          {errors.username && <p className="text-red-600 text-sm italic mt-1">{errors.username.message}</p>}
+        </div>
 
-    const calculateStrength = (password: string) => {
-        return Math.min(
-            (password.length > 7 ? 25 : 0) +
-            (/[A-Z]/.test(password) ? 25 : 0) +
-            (/[0-9]/.test(password) ? 25 : 0) +
-            (/[^A-Za-z0-9]/.test(password) ? 25 : 0)
-        );
-    };
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+          <input
+            id="email"
+            type="email"
+            {...register('email', { required: 'Email wajib diisi' })}
+            className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukkan email"
+          />
+          {errors.email && <p className="text-red-600 text-sm italic mt-1">{errors.email.message}</p>}
+        </div>
 
-    useEffect(() => {
-        setStrength(calculateStrength(formData.password));
-        setConfirmStrength(calculateStrength(formData.confirmPassword));
-    }, [formData.password, formData.confirmPassword]);
+        <div className="space-y-2">
+          <label htmlFor="nomorTelp" className="text-sm font-medium text-gray-700">Nomor Telepon</label>
+          <input
+            id="nomorTelp"
+            type="tel"
+            {...register('nomorTelp', { required: 'Nomor telepon wajib diisi' })}
+            onInput={(e) => {
+              e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+            }}
+            className={`w-full px-4 py-2.5 rounded-lg border ${errors.nomorTelp ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukkan nomor telepon"
+          />
+          {errors.nomorTelp && <p className="text-red-600 text-sm italic mt-1">{errors.nomorTelp.message}</p>}
+        </div>
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => ({ ...prev, [name]: undefined }));
+        <div className="space-y-2">
+          <label htmlFor="password" senior-className="text-sm font-medium text-gray-700">Password</label>
+          <input
+            id="password"
+            type="password"
+            {...register('password', { required: 'Password wajib diisi' })}
+            className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukkan password"
+          />
+          {errors.password && <p className="text-red-600 text-sm italic mt-1">{errors.password.message}</p>}
+        </div>
 
-        // realtime error text (tetap ada)
-        if (name === "email") {
-            if (value && !/\S+@\S+\.(com|net|co)/.test(value)) {
-                setErrors(prev => ({
-                    ...prev,
-                    email: "Format email tidak valid"
-                }));
-            }
-        }
-    };
+        <div className="space-y-2">
+          <label htmlFor="confirmPassword" senior-className="text-sm font-medium text-gray-700">Konfirmasi Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            {...register('confirmPassword', { required: 'Konfirmasi password wajib diisi' })}
+            className={`w-full px-4 py-2.5 rounded-lg border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukkan ulang password"
+          />
+          {errors.confirmPassword && <p className="text-red-600 text-sm italic mt-1">{errors.confirmPassword.message}</p>}
+        </div>
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        <div className="space-y-2">
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-medium text-gray-700">Captcha:</span>
+            <span className="font-mono text-lg font-bold text-gray-800 bg-gray-100 px-3 py-1.5 rounded">{DEFAULT_CAPTCHA}</span>
+          </div>
+          <input
+            type="text"
+            {...register('captcha')}
+            value={captchaInput}
+            onChange={(e) => setCaptchaInput(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300"
+            placeholder="Masukkan captcha"
+          />
+        </div>
 
-        const newErrors: Errors = {};
+        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg">
+          Register
+        </button>
 
-        if (!formData.username.trim()) {
-            newErrors.username = 'Username wajib diisi';
-        } else if (formData.username.length < 3) {
-            newErrors.username = 'Username minimal 3 karakter';
-        } else if (formData.username.length > 8) {
-            newErrors.username = 'Username maksimal 8 karakter';
-        }
+        <SocialAuth />
 
-        // 🔥 EMAIL VALIDATION + TOOLTIP HTML
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email wajib diisi';
-        } else if (!/\S+@\S+\.(com|net|co)/.test(formData.email)) {
-            newErrors.email = 'Format email tidak valid';
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Sudah punya akun? <Link href="/auth/login" className="text-blue-600 hover:text-blue-800 font-semibold">Login</Link>
+        </p>
 
-            const emailInput = document.querySelector<HTMLInputElement>('input[name="email"]');
-            if (emailInput) {
-                emailInput.setCustomValidity("Sertakan '@' pada alamat email dan domain (.com/.net/.co)");
-                emailInput.reportValidity(); 
-            }
-        }
-
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Nomor telepon wajib diisi';
-        } else if (formData.phone.length < 10) {
-            newErrors.phone = 'Nomor telepon minimal 10 karakter';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password wajib diisi';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'Password Minimal 8 karakter';
-        }
-
-        if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Konfirmasi password wajib diisi';
-        } else if (formData.confirmPassword !== formData.password) {
-            newErrors.confirmPassword = 'Password tidak sama';
-        }
-
-        if (!formData.captchaInput.trim()) {
-            newErrors.captcha = 'Captcha belum diisi';
-        } else if (formData.captchaInput !== captcha) {
-            newErrors.captcha = 'Harus sesuai dengan captcha yang ditampilkan';
-        }
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            toast.error("Registrasi gagal!");
-            return;
-        }
-
-        toast.success("Registrasi berhasil!");
-        router.push('/auth/login');
-    };
-
-    return (
-        <AuthFromWrapper title="Register">
-            <form onSubmit={handleSubmit} noValidate className="space-y-4 w-full">
-
-                {/* USERNAME */}
-                <div>
-                    <label>Username</label>
-                    <input
-                        name="username"
-                        placeholder="Masukkan username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
-                    />
-                    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-                </div>
-
-                {/* EMAIL */}
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Masukkan email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onInput={(e) => e.currentTarget.setCustomValidity("")} // reset tooltip
-                        className="w-full px-4 py-2 border rounded-lg"
-                    />
-                    {errors.email && (
-                        <p className="text-red-500 text-sm">{errors.email}</p>
-                    )}
-                </div>
-
-                {/* PHONE */}
-                <div>
-                    <label>Nomor Telepon</label>
-                    <input
-                        name="phone"
-                        placeholder="Masukkan nomor telepon"
-                        inputMode="numeric"
-                        value={formData.phone}
-                        onChange={(e) => {
-                            const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
-                            setFormData(prev => ({ ...prev, phone: onlyNumbers }));
-                            setErrors(prev => ({ ...prev, phone: undefined }));
-                        }}
-                        className="w-full px-4 py-2 border rounded-lg placeholder-gray-400"
-                    />
-                    {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-                </div>
-
-                {/* PASSWORD */}
-                <div>
-                    <label>Password</label>
-                    <div className="relative">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            placeholder="Masukkan password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg placeholder-gray-400"
-                        />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-2.5">
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                    </div>
-
-                    {formData.password && (
-                        <div className="mt-1">
-                            <div className="w-full h-2 bg-gray-200 rounded">
-                                <div className="h-2 bg-blue-500 rounded" style={{ width: `${strength}%` }} />
-                            </div>
-                            <p className="text-sm">Strength: {strength}%</p>
-                        </div>
-                    )}
-
-                    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-                </div>
-
-                {/* CONFIRM PASSWORD */}
-                <div>
-                    <label>Konfirmasi Password</label>
-                    <div className="relative">
-                        <input
-                            type={showConfirm ? "text" : "password"}
-                            name="confirmPassword"
-                            placeholder="Masukkan ulang password"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 pr-10 border rounded-lg placeholder-gray-400"
-                        />
-                        <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-2.5">
-                            {showConfirm ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                    </div>
-
-                    {formData.password && (
-                        <div className="mt-1">
-                            <div className="w-full h-2 bg-gray-200 rounded">
-                                <div className="h-2 bg-blue-500 rounded" style={{ width: `${confirmStrength}%` }} />
-                            </div>
-                            <p className="text-sm">Strength: {confirmStrength}%</p>
-                        </div>
-                    )}
-
-                    {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-                </div>
-
-                {/* CAPTCHA */}
-                <div>
-                    <div className="flex items-center gap-2">
-                        <label>Captcha:</label>
-                        <span className="bg-gray-200 px-3 py-1 rounded">
-                            {captcha}
-                            </span>
-                            <button
-                            type="button"
-                            onClick={() => setCaptcha(generateCaptcha())}
-                            >
-                                ⟳
-                                </button>
-                                </div>
-                                <input
-                                name="captchaInput"
-                                placeholder="Masukkan captcha"
-                                value={formData.captchaInput}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg placeholder-gray-400 mt-2"
-                                />
-                    {errors.captcha && <p className="text-red-500 text-sm">{errors.captcha}</p>}
-                </div>
-
-                <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
-                    Register
-                </button>
-
-                <SocialAuth />
-
-                <p className="text-center text-sm">
-                    Sudah punya akun? <Link href="/auth/login" className="text-blue-600">Login</Link>
-                </p>
-
-            </form>
-        </AuthFromWrapper>
-    );
+      </form>
+    </AuthFormWrapper>
+  );
 };
 
 export default RegisterPage;
