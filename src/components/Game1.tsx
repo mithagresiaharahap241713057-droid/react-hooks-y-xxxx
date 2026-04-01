@@ -66,7 +66,7 @@ export default function Game1() {
         setSpeed(700);
         setGameActive(true);
 
-        toast.info("⏱️ Game dimulai!");
+        toast.info("⏱️ Waktu dimulai! Kamu punya 30 detik");
     };
 
     const endGame = () => {
